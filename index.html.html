@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BCF Lille">
+<meta name="description" content="Boxing Club des Flandres — Application officielle">
+<title>BCF — Boxing Club des Flandres</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --jaune:        #F5C800;
+  --jaune-vif:    #FFD700;
+  --jaune-sombre: #B89000;
+  --jaune-pale:   #FFF3AA;
+  --noir:         #090909;
+  --noir2:        #111111;
+  --noir3:        #181818;
+  --noir4:        #202020;
+  --gris:         #666;
+  --gris-clair:   #999;
+  --blanc:        #F0F0F0;
+  --vert:         #22C55E;
+  --orange:       #F59E0B;
+  --rouge:        #EF4444;
+  --bleu:         #3B82F6;
+  --r:  12px;
+  --r2: 18px;
+  --ease: cubic-bezier(.4,0,.2,1);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'Inter',sans-serif;
+  background:var(--noir);
+  color:var(--blanc);
+  min-height:100dvh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── AMBIENT GLOW ── */
+body::after {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% -5%, rgba(245,200,0,0.12) 0%, transparent 65%),
+    radial-gradient(ellipse 30% 25% at 95% 95%,  rgba(245,200,0,0.05) 0%, transparent 60%);
+}
+
+/* ════════ SPLASH ════════ */
+#splash {
+  position:fixed; inset:0; z-index:999;
+  background:var(--noir);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  transition:opacity .5s ease;
+}
+#splash.fade { opacity:0; pointer-events:none; }
+
+.sp-ring {
+  width:120px; height:120px; border-radius:28px;
+  border:3px solid var(--jaune);
+  box-shadow: 0 0 0 0 rgba(245,200,0,.4);
+  animation: ringPulse 1.8s ease-in-out infinite;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:28px; overflow:hidden;
+  background:var(--noir2);
+}
+.sp-ring img { width:100%; height:100%; object-fit:cover; border-radius:24px; }
+@keyframes ringPulse {
+  0%,100% { box-shadow:0 0 0 0 rgba(245,200,0,.5), 0 0 30px rgba(245,200,0,.2); }
+  50%      { box-shadow:0 0 0 14px rgba(245,200,0,0), 0 0 60px rgba(245,200,0,.35); }
+}
+.sp-titre {
+  font-family:'Anton',sans-serif; font-size:2.8rem; letter-spacing:2px;
+  text-align:center; line-height:.95; margin-bottom:6px;
+}
+.sp-titre em { color:var(--jaune); font-style:normal; }
+.sp-sub { font-size:.68rem; color:var(--gris); letter-spacing:4px; text-transform:uppercase; margin-bottom:44px; }
+.sp-track { width:100px; height:3px; background:var(--noir3); border-radius:2px; overflow:hidden; }
+.sp-fill  { height:100%; background:linear-gradient(90deg,var(--jaune-sombre),var(--jaune)); border-radius:2px; animation:spLoad 1.6s ease forwards; }
+@keyframes spLoad { from{width:0} to{width:100%} }
+
+/* ════════ APP SHELL ════════ */
+#app { position:relative; z-index:1; display:none; }
+#app.visible { display:block; }
+
+/* ── HEADER ── */
+.hdr {
+  position:sticky; top:0; z-index:80;
+  background:rgba(9,9,9,.92);
+  backdrop-filter:blur(24px) saturate(180%);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  border-bottom:1px solid rgba(245,200,0,.12);
+  height:58px; padding:0 16px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.hdr-logo { display:flex; align-items:center; gap:10px; }
+.hdr-img {
+  width:36px; height:36px; border-radius:8px; overflow:hidden;
+  background:var(--noir3); border:1.5px solid rgba(245,200,0,.2);
+  display:flex; align-items:center; justify-content:center;
+}
+.hdr-img img { width:100%; height:100%; object-fit:cover; }
+.hdr-txt { line-height:1.2; }
+.hdr-nom { font-family:'Anton',sans-serif; font-size:1.05rem; letter-spacing:1px; }
+.hdr-sub { font-size:.56rem; color:var(--jaune); letter-spacing:2.5px; text-transform:uppercase; font-weight:700; }
+.hdr-badge {
+  font-size:.62rem; font-weight:700; letter-spacing:.8px; text-transform:uppercase;
+  padding:4px 11px; border-radius:20px;
+  background:rgba(245,200,0,.1); color:var(--jaune);
+  border:1px solid rgba(245,200,0,.22);
+}
+
+/* ── NAV ── */
+.nav {
+  position:fixed; bottom:0; left:0; right:0; z-index:80;
+  background:rgba(9,9,9,.97);
+  backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,.04);
+  display:flex;
+  padding-bottom:max(env(safe-area-inset-bottom),6px);
+}
+.ni {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:10px 0 4px; cursor:pointer; border:none; background:none;
+  color:#333; font-family:'Inter',sans-serif;
+  transition:color .2s var(--ease);
+  position:relative;
+}
+.ni.on { color:var(--jaune); }
+.ni svg { width:22px; height:22px; margin-bottom:3px; transition:.2s; }
+.ni.on svg { filter:drop-shadow(0 0 8px rgba(245,200,0,.6)); }
+.ni-label { font-size:.6rem; font-weight:700; letter-spacing:.5px; text-transform:uppercase; }
+.ni-bar {
+  position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+  width:0; height:2px; background:var(--jaune);
+  border-radius:1px; transition:width .3s ease;
+  box-shadow:0 0 8px var(--jaune);
+}
+.ni.on .ni-bar { width:26px; }
+.ni-dot {
+  position:absolute; top:9px; right:calc(50% - 15px);
+  width:7px; height:7px; border-radius:50%;
+  background:var(--jaune); box-shadow:0 0 6px var(--jaune);
+}
+
+/* ── PAGES ── */
+.page { display:none; padding:16px 16px 110px; animation:pgIn .28s ease; }
+.page.on { display:block; }
+@keyframes pgIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── COMMUNS ── */
+.sh {
+  font-family:'Anton',sans-serif; font-size:1.05rem; letter-spacing:2px;
+  text-transform:uppercase; color:var(--gris-clair);
+  margin-bottom:13px; margin-top:22px;
+  display:flex; align-items:center; gap:10px;
+}
+.sh::after { content:''; flex:1; height:1px; background:rgba(255,255,255,.05); }
+.sh:first-child { margin-top:0; }
+
+.card { background:var(--noir2); border:1px solid rgba(255,255,255,.05); border-radius:var(--r2); }
+
+.btn {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:14px 20px; border-radius:var(--r);
+  font-family:'Inter',sans-serif; font-weight:700; font-size:.88rem;
+  cursor:pointer; border:none; transition:all .2s var(--ease);
+}
+.btn-y {
+  background:var(--jaune); color:var(--noir);
+  box-shadow:0 4px 22px rgba(245,200,0,.28);
+}
+.btn-y:active { transform:scale(.97); background:var(--jaune-sombre); }
+.btn-ol {
+  background:transparent; color:var(--jaune);
+  border:1.5px solid rgba(245,200,0,.35);
+}
+.btn-ol:active { background:rgba(245,200,0,.08); }
+.btn-full { width:100%; }
+
+.badge {
+  display:inline-flex; align-items:center; gap:3px;
+  font-size:.62rem; font-weight:700; padding:3px 9px;
+  border-radius:20px; text-transform:uppercase; letter-spacing:.5px;
+}
+.bv { background:rgba(34,197,94,.1);  color:var(--vert);   border:1px solid rgba(34,197,94,.2); }
+.bo { background:rgba(245,158,11,.1); color:var(--orange); border:1px solid rgba(245,158,11,.2); }
+.br { background:rgba(239,68,68,.1);  color:var(--rouge);  border:1px solid rgba(239,68,68,.2); }
+.bb { background:rgba(59,130,246,.1); color:var(--bleu);   border:1px solid rgba(59,130,246,.2); }
+.by { background:rgba(245,200,0,.1);  color:var(--jaune);  border:1px solid rgba(245,200,0,.2); }
+
+/* ════════ ACCUEIL ════════ */
+.hero {
+  border-radius:var(--r2); padding:28px 20px 26px;
+  background:linear-gradient(160deg, #161200 0%, #0a0a0a 70%);
+  border:1px solid rgba(245,200,0,.18);
+  position:relative; overflow:hidden; margin-bottom:16px;
+}
+.hero::before {
+  content:''; position:absolute; top:0; right:0; bottom:0; width:55%;
+  background:url('https://boxe-lille-bcf.fr/wp-content/uploads/2024/03/BCF_sliders_frontpage_1400x500_4.jpg') center/cover;
+  opacity:.07;
+  mask-image:linear-gradient(to left,rgba(0,0,0,.8),transparent);
+  -webkit-mask-image:linear-gradient(to left,rgba(0,0,0,.8),transparent);
+}
+.hero::after {
+  content:'1933'; position:absolute; right:-8px; bottom:-24px;
+  font-family:'Anton',sans-serif; font-size:5rem; color:rgba(245,200,0,.06);
+  letter-spacing:-2px; pointer-events:none;
+}
+.hero-eyebrow {
+  font-size:.6rem; font-weight:700; letter-spacing:3px; text-transform:uppercase;
+  color:var(--jaune); margin-bottom:10px;
+  display:flex; align-items:center; gap:8px;
+}
+.hero-eyebrow::before { content:''; width:18px; height:2px; background:var(--jaune); border-radius:1px; }
+.hero-titre {
+  font-family:'Anton',sans-serif; font-size:2.9rem; line-height:.93; letter-spacing:1px; margin-bottom:8px;
+}
+.hero-titre em { color:var(--jaune); font-style:normal; }
+.hero-depuis { font-size:.72rem; color:var(--gris); letter-spacing:2px; text-transform:uppercase; margin-bottom:22px; }
+.hero-depuis strong { color:var(--jaune); }
+.hero-btns { display:flex; gap:10px; flex-wrap:wrap; }
+
+.stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+.stat { background:var(--noir2); border:1px solid rgba(255,255,255,.05); border-radius:var(--r); padding:16px 14px; text-align:center; }
+.stat-n { font-family:'Anton',sans-serif; font-size:2.2rem; line-height:1; color:var(--jaune); }
+.stat-l { font-size:.62rem; color:var(--gris); text-transform:uppercase; letter-spacing:1.5px; margin-top:3px; }
+
+.hor-card { background:var(--noir2); border:1px solid rgba(255,255,255,.05); border-radius:var(--r2); padding:18px; margin-bottom:12px; }
+.hor-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:9px 0; border-bottom:1px solid rgba(255,255,255,.04);
+}
+.hor-row:last-child { border-bottom:none; padding-bottom:0; }
+.hor-jour { font-weight:700; font-size:.85rem; }
+.hor-cat  { font-size:.62rem; color:var(--jaune); font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-top:1px; }
+.hor-h    { font-size:.8rem; color:var(--gris-clair); }
+
+.adr-card {
+  background:var(--noir2); border:1px solid rgba(255,255,255,.05);
+  border-radius:var(--r2); padding:18px; margin-bottom:12px;
+  display:flex; gap:14px;
+}
+.adr-ico  { font-size:28px; margin-top:2px; }
+.adr-nom  { font-weight:700; font-size:.9rem; margin-bottom:4px; }
+.adr-txt  { font-size:.76rem; color:var(--gris); line-height:1.65; }
+.adr-link {
+  display:inline-flex; align-items:center; gap:4px;
+  margin-top:9px; font-size:.73rem; color:var(--jaune); font-weight:700; text-decoration:none;
+}
+
+.cta-card {
+  background:linear-gradient(135deg,#141000,#0c0c00);
+  border:1px solid rgba(245,200,0,.2);
+  border-radius:var(--r2); padding:18px;
+  display:flex; align-items:center; gap:14px;
+}
+.cta-ico  { font-size:32px; }
+.cta-role { font-size:.68rem; color:var(--gris); margin-bottom:3px; text-transform:uppercase; letter-spacing:1px; font-weight:600; }
+.cta-nom  { font-weight:700; font-size:.9rem; margin-bottom:3px; }
+.cta-tel  { font-family:'Anton',sans-serif; font-size:1.25rem; color:var(--jaune); letter-spacing:1px; }
+
+/* ════════ INSCRIPTION ════════ */
+.prog-wrap { margin-bottom:20px; }
+.prog-steps { display:flex; gap:6px; margin-bottom:8px; }
+.prog-step { flex:1; height:4px; border-radius:2px; background:var(--noir3); transition:.3s ease; }
+.prog-step.done    { background:var(--jaune); box-shadow:0 0 8px rgba(245,200,0,.4); }
+.prog-step.current { background:rgba(245,200,0,.35); }
+.prog-info { display:flex; justify-content:space-between; }
+.prog-lbl { font-size:.7rem; font-weight:600; color:var(--gris); }
+.prog-cnt { font-size:.7rem; color:var(--jaune); font-weight:700; }
+
+.fb { background:var(--noir2); border:1px solid rgba(255,255,255,.05); border-radius:var(--r2); padding:18px; margin-bottom:12px; }
+.fb-title {
+  font-weight:700; font-size:.75rem; text-transform:uppercase; letter-spacing:1px;
+  color:var(--gris); margin-bottom:16px;
+  display:flex; align-items:center; gap:7px;
+}
+.fb-title span { font-size:1rem; }
+
+.field { margin-bottom:13px; }
+.field:last-child { margin-bottom:0; }
+.field label {
+  display:block; font-size:.67rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:1.2px; color:var(--gris); margin-bottom:6px;
+}
+.field label em { color:var(--jaune); font-style:normal; }
+.field input,.field select,.field textarea {
+  width:100%; background:var(--noir3); color:var(--blanc);
+  border:1.5px solid rgba(255,255,255,.07); border-radius:10px;
+  padding:12px 14px; font-family:'Inter',sans-serif; font-size:.9rem;
+  transition:.2s var(--ease); -webkit-appearance:none; appearance:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus {
+  outline:none; border-color:var(--jaune);
+  box-shadow:0 0 0 3px rgba(245,200,0,.08);
+}
+.field select option { background:#181818; }
+.field textarea { resize:none; line-height:1.5; }
+.field-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+.upload {
+  border:2px dashed rgba(245,200,0,.2); border-radius:12px; padding:22px 16px;
+  text-align:center; cursor:pointer; transition:.2s var(--ease);
+  background:rgba(245,200,0,.02); position:relative; overflow:hidden;
+}
+.upload:hover { border-color:var(--jaune); background:rgba(245,200,0,.05); }
+.upload.done  { border-color:var(--vert); border-style:solid; background:rgba(34,197,94,.04); }
+.upload input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+.upload-ico { font-size:30px; margin-bottom:6px; line-height:1; transition:.2s; }
+.upload-txt { font-size:.8rem; font-weight:600; transition:.2s; }
+.upload-sub { font-size:.64rem; color:var(--gris); margin-top:3px; transition:.2s; }
+.upload-ok  { font-size:.78rem; color:var(--vert); font-weight:700; margin-top:6px; display:none; }
+.upload.done .upload-ok  { display:block; }
+.upload.done .upload-ico { opacity:.25; }
+.upload.done .upload-txt { opacity:.25; }
+.upload.done .upload-sub { opacity:.25; }
+.photo-prev {
+  width:72px; height:72px; border-radius:50%; object-fit:cover;
+  border:3px solid var(--jaune); margin:0 auto 8px; display:none;
+}
+.upload.done .photo-prev { display:block; }
+
+.success-screen { text-align:center; padding:48px 20px; }
+.success-ico { font-size:72px; display:block; margin-bottom:20px; }
+.success-titre { font-family:'Anton',sans-serif; font-size:2.2rem; margin-bottom:12px; }
+.success-txt { font-size:.85rem; color:var(--gris); line-height:1.75; margin-bottom:30px; }
+
+/* ════════ PROFIL ════════ */
+.profil-hdr {
+  background:linear-gradient(160deg,#141000,#0a0a0a);
+  border:1px solid rgba(245,200,0,.15); border-radius:var(--r2);
+  padding:26px 20px; margin-bottom:14px; text-align:center; position:relative; overflow:hidden;
+}
+.profil-hdr::before {
+  content:'BCF'; position:absolute;
+  font-family:'Anton',sans-serif; font-size:7rem; color:rgba(245,200,0,.04);
+  bottom:-18px; right:-6px; letter-spacing:-4px; pointer-events:none;
+}
+.p-av {
+  width:80px; height:80px; border-radius:50%; margin:0 auto 12px;
+  background:linear-gradient(135deg,#2a1e00,var(--jaune-sombre));
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Anton',sans-serif; font-size:1.8rem; color:var(--noir);
+  border:3px solid rgba(245,200,0,.4);
+  box-shadow:0 0 30px rgba(245,200,0,.2);
+}
+.p-nom { font-family:'Anton',sans-serif; font-size:1.75rem; letter-spacing:1px; }
+.p-lic { font-size:.64rem; color:var(--jaune); font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-top:5px; }
+.p-cats { margin-top:10px; }
+
+.doc-row {
+  background:var(--noir2); border:1px solid rgba(255,255,255,.05);
+  border-radius:var(--r); padding:13px 14px; margin-bottom:8px;
+  display:flex; align-items:center; gap:12px;
+}
+.doc-ico { font-size:22px; }
+.doc-nom { font-size:.85rem; font-weight:600; }
+.doc-inf { font-size:.67rem; color:var(--gris); margin-top:1px; }
+
+.info-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+.ic { background:var(--noir3); border-radius:8px; padding:10px 12px; }
+.ic-l { font-size:.58rem; text-transform:uppercase; letter-spacing:1px; color:var(--gris); margin-bottom:3px; }
+.ic-v { font-size:.82rem; font-weight:700; }
+
+/* ════════ ADMIN ════════ */
+.login-wrap { display:flex; flex-direction:column; align-items:center; padding-top:20px; }
+.login-logo {
+  width:74px; height:74px; border-radius:18px; overflow:hidden;
+  margin-bottom:16px; border:2px solid rgba(245,200,0,.25);
+  box-shadow:0 0 40px rgba(245,200,0,.2);
+}
+.login-logo img { width:100%; height:100%; object-fit:cover; }
+.login-titre { font-family:'Anton',sans-serif; font-size:1.9rem; letter-spacing:2px; margin-bottom:4px; }
+.login-sub { font-size:.73rem; color:var(--gris); margin-bottom:28px; }
+.login-card { background:var(--noir2); border:1px solid rgba(255,255,255,.06); border-radius:var(--r2); padding:22px; width:100%; max-width:360px; }
+.login-hint { font-size:.66rem; color:var(--gris); margin-bottom:14px; }
+
+.adm-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.adm-titre { font-family:'Anton',sans-serif; font-size:1.4rem; letter-spacing:1px; }
+.adm-sub { font-size:.66rem; color:var(--gris); }
+.btn-deco {
+  background:rgba(245,200,0,.08); color:var(--jaune);
+  border:1px solid rgba(245,200,0,.2); padding:7px 14px;
+  border-radius:8px; font-size:.72rem; font-weight:700;
+  cursor:pointer; font-family:'Inter',sans-serif; transition:.2s;
+}
+.btn-deco:active { background:rgba(245,200,0,.15); }
+
+.kpi-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
+.kpi { background:var(--noir2); border:1px solid rgba(255,255,255,.05); border-radius:var(--r); padding:12px 10px; text-align:center; }
+.kpi-n { font-family:'Anton',sans-serif; font-size:1.9rem; line-height:1; }
+.kpi-n.ky { color:var(--jaune); }
+.kpi-n.ko { color:var(--orange); }
+.kpi-n.kv { color:var(--vert); }
+.kpi-l { font-size:.56rem; text-transform:uppercase; letter-spacing:1px; color:var(--gris); margin-top:2px; }
+
+.filters { display:flex; gap:7px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; margin-bottom:12px; }
+.filters::-webkit-scrollbar { display:none; }
+.fb2 {
+  white-space:nowrap; padding:7px 14px; border-radius:20px;
+  font-size:.7rem; font-weight:700; letter-spacing:.3px;
+  cursor:pointer; border:1px solid rgba(255,255,255,.08);
+  background:var(--noir2); color:var(--gris);
+  font-family:'Inter',sans-serif; transition:.2s;
+}
+.fb2.on { background:var(--jaune); color:var(--noir); border-color:var(--jaune); }
+
+.search-bar {
+  background:var(--noir2); border:1.5px solid rgba(255,255,255,.07);
+  border-radius:10px; padding:11px 14px; color:var(--blanc);
+  font-family:'Inter',sans-serif; font-size:.85rem;
+  width:100%; margin-bottom:12px; transition:.2s;
+}
+.search-bar:focus { outline:none; border-color:var(--jaune); }
+.search-bar::placeholder { color:var(--gris); }
+
+.adh-row {
+  background:var(--noir2); border:1px solid rgba(255,255,255,.05);
+  border-radius:var(--r); padding:12px 14px; margin-bottom:8px;
+  display:flex; align-items:center; gap:12px; cursor:pointer;
+  transition:.18s var(--ease); -webkit-user-select:none; user-select:none;
+}
+.adh-row:active { border-color:rgba(245,200,0,.3); background:rgba(245,200,0,.04); }
+.adh-av {
+  width:44px; height:44px; border-radius:50%; flex-shrink:0;
+  background:linear-gradient(135deg,#2a1e00,var(--jaune-sombre));
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Anton',sans-serif; font-size:.9rem; color:var(--noir);
+}
+.adh-nom { font-weight:700; font-size:.88rem; }
+.adh-inf { font-size:.68rem; color:var(--gris); margin-top:1px; }
+
+/* ── OVERLAY / SHEET ── */
+.overlay {
+  position:fixed; inset:0; z-index:200;
+  background:rgba(0,0,0,.82); backdrop-filter:blur(8px);
+  display:none; align-items:flex-end;
+}
+.overlay.on { display:flex; }
+.sheet {
+  background:var(--noir2); border-radius:24px 24px 0 0; width:100%;
+  max-height:88dvh; overflow-y:auto;
+  padding:20px 18px max(env(safe-area-inset-bottom),24px);
+  animation:sheetUp .3s cubic-bezier(.32,0,.67,0);
+}
+@keyframes sheetUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.sheet-handle { width:32px; height:4px; background:rgba(255,255,255,.1); border-radius:2px; margin:0 auto 20px; }
+.sheet-hdr { display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+.sheet-av {
+  width:54px; height:54px; border-radius:50%; flex-shrink:0;
+  background:linear-gradient(135deg,#2a1e00,var(--jaune-sombre));
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Anton',sans-serif; font-size:1.2rem; color:var(--noir);
+}
+.sheet-nom  { font-family:'Anton',sans-serif; font-size:1.4rem; letter-spacing:.5px; }
+.sheet-meta { font-size:.72rem; color:var(--gris); margin-top:2px; }
+.sheet-sec  { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--gris); margin-bottom:10px; }
+.sdoc {
+  background:var(--noir3); border-radius:10px; padding:12px 14px;
+  display:flex; align-items:center; gap:10px; margin-bottom:8px;
+}
+.sdoc-ico  { font-size:20px; }
+.sdoc-nom  { font-size:.82rem; font-weight:600; flex:1; }
+.sdoc-tail { font-size:.65rem; color:var(--gris); }
+.btn-sdl {
+  background:rgba(245,200,0,.1); color:var(--jaune);
+  border:1px solid rgba(245,200,0,.2); padding:6px 12px;
+  border-radius:8px; font-size:.7rem; font-weight:700;
+  cursor:pointer; font-family:'Inter',sans-serif; transition:.2s;
+}
+.btn-sdl:active { background:var(--jaune); color:var(--noir); }
+.sheet-btns { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(10px);
+  background:var(--noir3); color:var(--blanc);
+  padding:11px 20px; border-radius:12px;
+  font-size:.79rem; font-weight:600; z-index:500;
+  opacity:0; transition:all .28s ease;
+  white-space:nowrap; pointer-events:none;
+  border:1px solid rgba(255,255,255,.07);
+  box-shadow:0 8px 32px rgba(0,0,0,.6);
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.tv { border-color:rgba(34,197,94,.3); }
+.toast.te { border-color:rgba(239,68,68,.3); }
+.toast.ty { border-color:rgba(245,200,0,.3); }
+</style>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="sp-ring">
+    <img src="https://boxe-lille-bcf.fr/wp-content/uploads/2024/06/logo_BCF_512x512_fd_blanc.png" alt="BCF"
+         onerror="this.style.display='none';this.parentElement.innerHTML='🥊'">
+  </div>
+  <div class="sp-titre">BOXING<br><em>CLUB DES</em><br>FLANDRES</div>
+  <div class="sp-sub">Lille · Wazemmes · Depuis 1933</div>
+  <div class="sp-track"><div class="sp-fill"></div></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <header class="hdr">
+    <div class="hdr-logo">
+      <div class="hdr-img">
+        <img src="https://boxe-lille-bcf.fr/wp-content/uploads/2024/06/logo_BCF_512x512_fd_blanc.png" alt="BCF"
+             onerror="this.style.display='none';this.parentElement.innerHTML='🥊'">
+      </div>
+      <div class="hdr-txt">
+        <div class="hdr-nom">BCF LILLE</div>
+        <div class="hdr-sub">Boxing Club des Flandres</div>
+      </div>
+    </div>
+    <div class="hdr-badge" id="hbadge">Accueil</div>
+  </header>
+
+  <!-- ══ ACCUEIL ══ -->
+  <div class="page on" id="pg-accueil">
+    <div class="hero">
+      <div class="hero-eyebrow">Club officiel — Lille, Wazemmes</div>
+      <div class="hero-titre">BOXING<br><em>CLUB</em><br>DES FLANDRES</div>
+      <div class="hero-depuis">Référence en boxe anglaise à Lille<br>depuis <strong>1933</strong> · Affilié FFB</div>
+      <div class="hero-btns">
+        <button class="btn btn-y" onclick="goPage('inscription')">✍️ S'inscrire</button>
+        <button class="btn btn-ol" onclick="goPage('profil')">👤 Mon espace</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-n">90+</div><div class="stat-l">Années d'histoire</div></div>
+      <div class="stat"><div class="stat-n">124</div><div class="stat-l">Adhérents actifs</div></div>
+      <div class="stat"><div class="stat-n">5</div><div class="stat-l">Jours / semaine</div></div>
+      <div class="stat"><div class="stat-n">3</div><div class="stat-l">Niveaux de pratique</div></div>
+    </div>
+
+    <div class="sh">🕐 Horaires d'entraînement</div>
+    <div class="hor-card">
+      <div class="hor-row"><div><div class="hor-jour">Lundi</div><div class="hor-cat">Adultes</div></div><div class="hor-h">18h30 — 20h30</div></div>
+      <div class="hor-row"><div><div class="hor-jour">Mardi</div><div class="hor-cat">Enfants</div></div><div class="hor-h">18h30 — 19h30</div></div>
+      <div class="hor-row"><div><div class="hor-jour">Mercredi</div><div class="hor-cat">Adultes</div></div><div class="hor-h">18h30 — 20h30</div></div>
+      <div class="hor-row"><div><div class="hor-jour">Jeudi</div><div class="hor-cat">Enfants</div></div><div class="hor-h">18h30 — 19h30</div></div>
+      <div class="hor-row"><div><div class="hor-jour">Vendredi</div><div class="hor-cat">Adultes</div></div><div class="hor-h">18h30 — 20h30</div></div>
+      <div class="hor-row"><div><div class="hor-jour" style="color:var(--gris)">Vacances scolaires</div><div class="hor-cat">Lun · Mer · Ven</div></div><div class="hor-h">18h00 — 20h00</div></div>
+    </div>
+
+    <div class="sh">📍 Adresse</div>
+    <div class="adr-card">
+      <div class="adr-ico">🏟️</div>
+      <div>
+        <div class="adr-nom">Complexe Jacqueline Auriol</div>
+        <div class="adr-txt">62 Rue d'Iéna — Salle au 1er étage<br>Accès : Rue Paul Lafargue<br>59000 Lille (Wazemmes)</div>
+        <a class="adr-link" href="https://maps.google.com/?q=Boxing+Club+des+Flandres+Lille" target="_blank">📍 Ouvrir dans Maps →</a>
+      </div>
+    </div>
+
+    <div class="sh">📞 Contact</div>
+    <div class="cta-card">
+      <div class="cta-ico">👤</div>
+      <div>
+        <div class="cta-role">Responsable inscriptions</div>
+        <div class="cta-nom">Jean-Claude MBIYE</div>
+        <div class="cta-tel">06 17 02 38 88</div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:.63rem;color:var(--gris);padding:14px 0 4px;">
+      Cours d'initiation gratuits · Tous niveaux · Mixte<br>
+      <a href="https://boxe-lille-bcf.fr" target="_blank" style="color:var(--jaune);text-decoration:none">boxe-lille-bcf.fr</a>
+    </div>
+  </div>
+
+  <!-- ══ INSCRIPTION ══ -->
+  <div class="page" id="pg-inscription">
+    <div class="prog-wrap">
+      <div class="prog-steps">
+        <div class="prog-step done" id="ps1"></div>
+        <div class="prog-step" id="ps2"></div>
+        <div class="prog-step" id="ps3"></div>
+      </div>
+      <div class="prog-info">
+        <span class="prog-lbl" id="prog-lbl">Informations personnelles</span>
+        <span class="prog-cnt" id="prog-cnt">1 / 3</span>
+      </div>
+    </div>
+
+    <!-- Step 1 -->
+    <div id="s1">
+      <div class="fb">
+        <div class="fb-title"><span>👤</span> Identité</div>
+        <div class="field-2">
+          <div class="field"><label>Nom <em>*</em></label><input type="text" id="f-nom" placeholder="DUPONT"></div>
+          <div class="field"><label>Prénom <em>*</em></label><input type="text" id="f-prenom" placeholder="Jean"></div>
+        </div>
+        <div class="field"><label>Date de naissance <em>*</em></label><input type="date" id="f-ddn"></div>
+        <div class="field-2">
+          <div class="field"><label>Sexe <em>*</em></label>
+            <select id="f-sexe">
+<option value="">—</option>
+<option>Homme</option>
+<option>Femme</option>
+</select>
+          </div>
+          <div class="field"><label>Nationalité</label><input type="text" id="f-nat" placeholder="Française"></div>
+        </div>
+      </div>
+      <div class="fb">
+        <div class="fb-title"><span>🏠</span> Coordonnées</div>
+        <div class="field"><label>Adresse <em>*</em></label><input type="text" id="f-adr" placeholder="12 rue des Acacias"></div>
+        <div class="field-2">
+          <div class="field"><label>Code postal <em>*</em></label><input type="text" id="f-cp" placeholder="59000" inputmode="numeric"></div>
+          <div class="field"><label>Ville <em>*</em></label><input type="text" id="f-ville" placeholder="Lille"></div>
+        </div>
+        <div class="field"><label>Téléphone <em>*</em></label><input type="tel" id="f-tel" placeholder="06 00 00 00 00" inputmode="tel"></div>
+        <div class="field"><label>Email <em>*</em></label><input type="email" id="f-email" placeholder="jean@email.com" inputmode="email"></div>
+      </div>
+      <div class="fb">
+        <div class="fb-title"><span>🥊</span> Pratique sportive</div>
+        <div class="field"><label>Catégorie <em>*</em></label>
+          <select id="f-cat"><option value="">— Choisir —</option><option>Poussin (6–7 ans)</option><option>Pupille (8–9 ans)</option><option>Minime (10–11 ans)</option><option>Benjamin (12–13 ans)</option><option>Cadet (14–15 ans)</option><option>Junior (16–17 ans)</option><option>Senior (+18 ans)</option><option>Vétéran (+40 ans)</option></select>
+        </div>
+        <div class="field"><label>Type de pratique</label>
+          <select id="f-type"><option>Boxe éducative (loisir)</option><option>Boxe loisir</option><option>Boxe amateur (compétition)</option></select>
+        </div>
+        <div class="field"><label>Niveau actuel</label>
+          <select id="f-niveau"><option>Débutant</option><option>Intermédiaire</option><option>Confirmé</option></select>
+        </div>
+      </div>
+      <button class="btn btn-y btn-full" onclick="nStep(2)">Étape suivante →</button>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="s2" style="display:none">
+      <div class="fb">
+        <div class="fb-title"><span>📸</span> Photo d'identité</div>
+        <div class="upload" id="uz-photo">
+          <input type="file" accept="image/*" capture="user" onchange="handlePhoto(this)">
+          <img class="photo-prev" id="photo-prev" alt="">
+          <div class="upload-ico">📸</div>
+          <div class="upload-txt">Prendre / choisir une photo</div>
+          <div class="upload-sub">JPG ou PNG · Fond neutre · Portrait</div>
+          <div class="upload-ok">✅ Photo ajoutée avec succès</div>
+        </div>
+      </div>
+      <div class="fb">
+        <div class="fb-title"><span>🚑</span> Contact d'urgence</div>
+        <div class="field"><label>Nom et prénom</label><input type="text" placeholder="Marie Dupont (mère)"></div>
+        <div class="field"><label>Téléphone</label><input type="tel" placeholder="06 00 00 00 00" inputmode="tel"></div>
+        <div class="field"><label>Lien de parenté</label>
+          <select><option>Père / Mère</option><option>Conjoint(e)</option><option>Frère / Sœur</option><option>Autre</option></select>
+        </div>
+      </div>
+      <div class="fb">
+        <div class="fb-title"><span>🩺</span> Informations médicales</div>
+        <div class="field"><label>Médecin traitant</label><input type="text" placeholder="Dr Martin — 03 20 00 00 00"></div>
+        <div class="field"><label>Groupe sanguin</label>
+          <select><option value="">— Inconnu —</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select>
+        </div>
+        <div class="field"><label>Allergies / traitements</label><textarea rows="2" placeholder="Aucun..."></textarea></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <button class="btn btn-ol" onclick="nStep(1)">← Retour</button>
+        <button class="btn btn-y" onclick="nStep(3)">Suivant →</button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="s3" style="display:none">
+      <div class="fb">
+        <div class="fb-title"><span>📄</span> Documents (optionnels)</div>
+        <div class="field">
+          <label>Certificat médical d'aptitude</label>
+          <div class="upload" id="uz-med">
+            <input type="file" accept=".pdf,image/*" onchange="handleDoc('med',this)">
+            <div class="upload-ico">🩺</div>
+            <div class="upload-txt">Certificat médical</div>
+            <div class="upload-sub">Délivré par votre médecin — PDF ou photo · Max 10 Mo</div>
+            <div class="upload-ok">✅ Certificat médical ajouté</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Certificat ophtalmologique</label>
+          <div class="upload" id="uz-oph">
+            <input type="file" accept=".pdf,image/*" onchange="handleDoc('oph',this)">
+            <div class="upload-ico">👁️</div>
+            <div class="upload-txt">Certificat ophtalmologique</div>
+            <div class="upload-sub">Obligatoire pour la pratique — PDF ou photo · Max 10 Mo</div>
+            <div class="upload-ok">✅ Certificat ophtalmo ajouté</div>
+          </div>
+        </div>
+      </div>
+      <div class="fb">
+        <div class="fb-title"><span>✅</span> Validation</div>
+        <p style="font-size:.77rem;color:var(--gris);line-height:1.65;margin-bottom:14px;">En soumettant ce formulaire, j'atteste l'exactitude des informations. Les données sont traitées exclusivement par le BCF conformément au RGPD.</p>
+        <div class="field">
+          <label style="display:flex;align-items:flex-start;gap:10px;text-transform:none;font-size:.8rem;font-weight:600;letter-spacing:0;cursor:pointer;">
+            <input type="checkbox" id="cb1" style="width:auto;margin-top:2px;accent-color:var(--jaune);flex-shrink:0;">
+            J'accepte le traitement de mes données personnelles par le BCF <em style="color:var(--jaune);font-style:normal;">*</em>
+          </label>
+        </div>
+</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <button class="btn btn-ol" onclick="nStep(2)">← Retour</button>
+        <button class="btn btn-y" onclick="submitForm()">🥊 Envoyer</button>
+      </div>
+    </div>
+
+    <!-- Succès -->
+    <div id="s-ok" style="display:none">
+      <div class="success-screen">
+        <span class="success-ico">🎉</span>
+        <div class="success-titre">Dossier envoyé !</div>
+        <p class="success-txt">Ton dossier a bien été transmis aux administrateurs du BCF.<br><br>Tu recevras une confirmation sous <strong style="color:var(--blanc)">48h ouvrées</strong>.<br><br>Contact : <strong style="color:var(--jaune)">06 17 02 38 88</strong></p>
+        <button class="btn btn-y" style="margin:0 auto" onclick="goPage('accueil')">🏠 Retour à l'accueil</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MON ESPACE ══ -->
+  <div class="page" id="pg-profil">
+    <div class="profil-hdr">
+      <div class="p-av">JD</div>
+      <div class="p-nom">Jean Dupont</div>
+      <div class="p-lic">🥊 Licence : BCF-2025-0142</div>
+      <div class="p-cats" style="margin-top:10px;"><span class="badge bb">Senior</span> &nbsp;<span class="badge bv">Saison 2024–25</span></div>
+    </div>
+
+    <div class="sh">📋 Mon dossier</div>
+    <div class="doc-row"><div class="doc-ico">📸</div><div style="flex:1"><div class="doc-nom">Photo d'identité</div><div class="doc-inf">Ajoutée le 02/09/2024</div></div><span class="badge bv">✓ OK</span></div>
+    <div class="doc-row"><div class="doc-ico">🩺</div><div style="flex:1"><div class="doc-nom">Certificat médical</div><div class="doc-inf">Valable jusqu'au 01/09/2025</div></div><span class="badge bv">✓ OK</span></div>
+    <div class="doc-row"><div class="doc-ico">👁️</div><div style="flex:1"><div class="doc-nom">Certificat ophtalmologique</div><div class="doc-inf">En attente de validation</div></div><span class="badge bo">⏳ Attente</span></div>
+    <div class="doc-row"><div class="doc-ico">📋</div><div style="flex:1"><div class="doc-nom">Fiche d'inscription</div><div class="doc-inf">Validée le 05/09/2024</div></div><span class="badge bv">✓ Validée</span></div>
+    <div style="margin:10px 0 16px;">
+      <button class="btn btn-y btn-full" onclick="toast('📥 Téléchargement de vos documents...','tv')">📥 Télécharger mes documents</button>
+    </div>
+
+    <div class="sh">📅 Mes séances</div>
+    <div class="doc-row"><div class="doc-ico">🥊</div><div><div class="doc-nom">Boxe anglaise — Lundi</div><div class="doc-inf">18h30–20h30 · Salle A · Coach Sébastien</div></div></div>
+    <div class="doc-row"><div class="doc-ico">💪</div><div><div class="doc-nom">Prépa physique — Mercredi</div><div class="doc-inf">18h30–20h30 · Salle B · Coach Karim</div></div></div>
+    <div class="doc-row"><div class="doc-ico">🏋️</div><div><div class="doc-nom">Sparring — Vendredi</div><div class="doc-inf">18h30–20h30 · Ring principal</div></div></div>
+
+    <div class="sh">💳 Mon adhésion</div>
+    <div class="info-grid">
+      <div class="ic"><div class="ic-l">Saison</div><div class="ic-v">2024–2025</div></div>
+      <div class="ic"><div class="ic-l">Statut</div><div class="ic-v" style="color:var(--vert)">✓ Actif</div></div>
+      <div class="ic"><div class="ic-l">Catégorie</div><div class="ic-v">Senior</div></div>
+      <div class="ic"><div class="ic-l">N° Licence FFB</div><div class="ic-v">BCF-0142</div></div>
+    </div>
+  </div>
+
+  <!-- ══ ADMIN ══ -->
+  <div class="page" id="pg-admin">
+    <div id="admin-login" class="login-wrap">
+      <div class="login-logo">
+        <img src="https://boxe-lille-bcf.fr/wp-content/uploads/2024/06/logo_BCF_512x512_fd_blanc.png" alt="BCF"
+             onerror="this.style.display='none';this.parentElement.innerHTML='🥊'">
+      </div>
+      <div class="login-titre">ADMIN</div>
+      <div class="login-sub">Réservé aux responsables du club</div>
+      <div class="login-card">
+        <div class="field"><label>Identifiant</label><input type="text" id="l-u" placeholder="admin" autocomplete="username"></div>
+        <div class="field"><label>Mot de passe</label><input type="password" id="l-p" placeholder="••••••" autocomplete="current-password"></div>
+        <div class="login-hint">🔑 Démo : admin / bcf2025</div>
+        <button class="btn btn-y btn-full" onclick="doLogin()">🔓 Connexion sécurisée</button>
+      </div>
+    </div>
+
+    <div id="admin-panel" style="display:none">
+      <div class="adm-top">
+        <div><div class="adm-titre">TABLEAU DE BORD</div><div class="adm-sub">Saison 2024–2025 · BCF Lille</div></div>
+        <button class="btn-deco" onclick="doLogout()">Déconnexion</button>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-n kv">116</div><div class="kpi-l">Complets</div></div>
+        <div class="kpi"><div class="kpi-n ko">8</div><div class="kpi-l">En attente</div></div>
+        <div class="kpi"><div class="kpi-n ky">5</div><div class="kpi-l">Incomplets</div></div>
+      </div>
+      <input class="search-bar" type="text" placeholder="🔍  Rechercher un adhérent..." oninput="searchAdh(this.value)">
+      <div class="filters">
+        <button class="fb2 on" onclick="filterAdh('tous',this)">Tous (129)</button>
+        <button class="fb2" onclick="filterAdh('ok',this)">✅ Complets</button>
+        <button class="fb2" onclick="filterAdh('attente',this)">⏳ En attente</button>
+        <button class="fb2" onclick="filterAdh('incomplet',this)">❌ Incomplets</button>
+      </div>
+      <div id="adh-list"></div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <button class="ni on" id="ni-accueil" onclick="goPage('accueil')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span class="ni-label">Accueil</span><div class="ni-bar"></div>
+    </button>
+    <button class="ni" id="ni-inscription" onclick="goPage('inscription')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15h8v2H8zm0-4h8v2H8zm0-4h5v2H8z"/></svg>
+      <span class="ni-label">Inscription</span><div class="ni-bar"></div>
+    </button>
+    <button class="ni" id="ni-profil" onclick="goPage('profil')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+      <span class="ni-label">Mon espace</span><div class="ni-bar"></div>
+    </button>
+    <button class="ni" id="ni-admin" onclick="goPage('admin')">
+      <div class="ni-dot"></div>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.6 3.9 10.7 9 12 5.1-1.3 9-6.4 9-12V5l-9-4zm0 4l5 2.2V11c0 3.2-2.2 6.3-5 7.4-2.8-1.1-5-4.2-5-7.4V7.2L12 5z"/></svg>
+      <span class="ni-label">Admin</span><div class="ni-bar"></div>
+    </button>
+  </nav>
+</div>
+
+<!-- SHEET MODAL -->
+<div class="overlay" id="overlay" onclick="closeSheet(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hdr">
+      <div class="sheet-av" id="sh-av"></div>
+      <div><div class="sheet-nom" id="sh-nom"></div><div class="sheet-meta" id="sh-meta"></div></div>
+    </div>
+    <div class="info-grid" id="sh-info"></div>
+    <div class="sheet-sec">Documents transmis</div>
+    <div id="sh-docs"></div>
+    <div class="sheet-btns">
+      <button class="btn btn-ol" onclick="toast('📧 Email envoyé','tv');closeSheet()">✉️ Contacter</button>
+      <button class="btn btn-y" onclick="toast('📦 Téléchargement...','tv')">📥 Tout DL</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast-el"></div>
+
+<script>
+// ── SUPABASE ──
+const SUPABASE_URL = "https://uyhlnppzpnsfyetspkfd.supabase.co";
+const SUPABASE_KEY = "sb_publishable_BSPPuoCSoJw4gSChubAwNA_9dSMp0x4";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// ── UPLOAD DOCS (Storage) ──
+const BUCKET_DOCS = 'documents-bcf';
+let FILE_PHOTO = null;
+let FILE_MED = null;
+let FILE_OPH = null;
+
+function slugify(str) {
+  return (str || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .slice(0, 40);
+}
+
+async function uploadToBucket(folder, key, file) {
+  if (!file) return null;
+  const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+  const path = `${folder}/${key}.${ext}`;
+
+  // upsert: false => pas besoin de policy UPDATE (chaque dossier est unique)
+  const { error } = await supabaseClient
+    .storage
+    .from(BUCKET_DOCS)
+    .upload(path, file, {
+      upsert: false,
+      contentType: file.type
+    });
+
+  if (error) throw error;
+  return path; // on stocke le PATH en base
+}
+
+
+// ── DONNÉES ──
+const DATA = [
+  {nom:'Dupont',    prenom:'Jean',     cat:'Senior',  date:'01/09/24', statut:'ok',       docs:['photo','medical','ophtalmo'], tel:'06 12 34 56 78', email:'jean.d@email.com'},
+  {nom:'Martin',    prenom:'Sophie',   cat:'Junior',  date:'15/09/24', statut:'ok',       docs:['photo','medical','ophtalmo'], tel:'06 23 45 67 89', email:'sophie.m@email.com'},
+  {nom:'Leroy',     prenom:'Lucas',    cat:'Cadet',   date:'20/09/24', statut:'attente',  docs:['photo','medical'],            tel:'06 34 56 78 90', email:'lucas.l@email.com'},
+  {nom:'Bernard',   prenom:'Emma',     cat:'Minime',  date:'22/09/24', statut:'attente',  docs:['photo'],                     tel:'06 45 67 89 01', email:'emma.b@email.com'},
+  {nom:'Petit',     prenom:'Thomas',   cat:'Senior',  date:'02/10/24', statut:'incomplet',docs:[],                            tel:'06 56 78 90 12', email:'thomas.p@email.com'},
+  {nom:'Garcia',    prenom:'Léa',      cat:'Junior',  date:'05/10/24', statut:'ok',       docs:['photo','medical','ophtalmo'], tel:'06 67 89 01 23', email:'lea.g@email.com'},
+  {nom:'Roux',      prenom:'Antoine',  cat:'Benjamin',date:'10/10/24', statut:'attente',  docs:['medical'],                   tel:'06 78 90 12 34', email:'antoine.r@email.com'},
+  {nom:'Moreau',    prenom:'Clara',    cat:'Vétéran', date:'12/10/24', statut:'ok',       docs:['photo','medical','ophtalmo'], tel:'06 89 01 23 45', email:'clara.m@email.com'},
+  {nom:'Ndiaye',    prenom:'Ibrahima', cat:'Senior',  date:'18/10/24', statut:'ok',       docs:['photo','medical','ophtalmo'], tel:'06 90 12 34 56', email:'ibra.n@email.com'},
+  {nom:'Chevalier', prenom:'Pauline',  cat:'Junior',  date:'25/10/24', statut:'incomplet',docs:['photo'],                     tel:'07 01 23 45 67', email:'pauline.c@email.com'},
+];
+const DM = {
+  photo:   {ico:'📸', nom:"Photo d'identité",            taille:'1.3 Mo'},
+  medical: {ico:'🩺', nom:'Certificat médical',           taille:'480 Ko'},
+  ophtalmo:{ico:'👁️', nom:'Certificat ophtalmologique',  taille:'390 Ko'},
+};
+const SB = {
+  ok:       '<span class="badge bv">✅ Complet</span>',
+  attente:  '<span class="badge bo">⏳ Attente</span>',
+  incomplet:'<span class="badge br">❌ Incomplet</span>',
+};
+
+let filtre = 'tous', search = '';
+
+// ── SPLASH ──
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const s = document.getElementById('splash');
+    s.classList.add('fade');
+    setTimeout(() => { s.style.display='none'; document.getElementById('app').classList.add('visible'); }, 500);
+  }, 1900);
+});
+
+// ── NAV ──
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+  document.getElementById('pg-'+id).classList.add('on');
+  document.getElementById('ni-'+id).classList.add('on');
+  document.getElementById('hbadge').textContent = {accueil:'Accueil',inscription:'Inscription',profil:'Mon espace',admin:'Admin'}[id];
+  window.scrollTo(0,0);
+}
+
+// ── FORMULAIRE ──
+let cs = 1;
+function nStep(n) {
+  if (n===2 && (!document.getElementById('f-nom').value || !document.getElementById('f-prenom').value)) {
+    toast('⚠️ Nom et prénom obligatoires','te'); return;
+  }
+  document.getElementById('s'+cs).style.display='none';
+  if (n<=3) document.getElementById('s'+n).style.display='block';
+  cs=n;
+  const L={1:'Informations personnelles',2:'Photo & contacts',3:'Documents & validation'};
+  document.getElementById('prog-lbl').textContent = L[n]||'';
+  document.getElementById('prog-cnt').textContent = n+' / 3';
+  ['ps1','ps2','ps3'].forEach((id,i)=>{
+    document.getElementById(id).className='prog-step'+(i+1<n?' done':i+1===n?' current':'');
+  });
+  window.scrollTo(0,0);
+}
+function handlePhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  FILE_PHOTO = input.files[0];
+
+  const r = new FileReader();
+  r.onload = e => {
+    const p = document.getElementById('photo-prev');
+    p.src = e.target.result;
+    document.getElementById('uz-photo').classList.add('done');
+  };
+  r.readAsDataURL(FILE_PHOTO);
+}
+
+function handleDoc(type,input) {
+  if (!input.files || !input.files[0]) return;
+
+  const f = input.files[0];
+  if (type === 'med') FILE_MED = f;
+  if (type === 'oph') FILE_OPH = f;
+
+  document.getElementById('uz-'+type).classList.add('done');
+  toast('✅ Document prêt à être envoyé','tv');
+}
+
+async function submitForm() {
+  if (!document.getElementById('cb1').checked) {
+    toast('⚠️ Accepte les conditions obligatoires','te');
+    return;
+  }
+
+  const nom = document.getElementById('f-nom').value.trim();
+  const prenom = document.getElementById('f-prenom').value.trim();
+
+  const payloadBase = {
+    nom,
+    prenom,
+    date_naissance: document.getElementById('f-ddn').value || null,
+    sexe: document.getElementById('f-sexe').value || null,
+    nationalite: (document.getElementById('f-nat')?.value || '').trim() || null,
+
+    adresse: document.getElementById('f-adr').value.trim(),
+    code_postal: (document.getElementById('f-cp')?.value || '').trim() || null,
+    ville: (document.getElementById('f-ville')?.value || '').trim() || null,
+    telephone: (document.getElementById('f-tel')?.value || '').trim() || null,
+    email: (document.getElementById('f-email')?.value || '').trim() || null,
+
+    categorie: document.getElementById('f-cat')?.value || null,
+    type_pratique: document.getElementById('f-type')?.value || null,
+    niveau: document.getElementById('f-niveau')?.value || null,
+
+    statut: 'attente'
+  };
+
+  if (!payloadBase.nom || !payloadBase.prenom || !payloadBase.date_naissance || !payloadBase.sexe || !payloadBase.adresse) {
+    toast('⚠️ Merci de compléter les champs obligatoires','te');
+    return;
+  }
+
+  // Dossier lisible + unique (comme tu veux)
+  const membreId = (crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+  const folder = `${slugify(prenom)}-${slugify(nom)}_${membreId}`;
+
+  try {
+    toast('⏳ Upload des documents...','ty');
+
+    const photo_path = await uploadToBucket(folder, 'photo', FILE_PHOTO);
+    const certificat_medical_path = await uploadToBucket(folder, 'certificat_medical', FILE_MED);
+    const certificat_ophtalmo_path = await uploadToBucket(folder, 'certificat_ophtalmo', FILE_OPH);
+
+    toast('⏳ Enregistrement en base...','ty');
+
+    const payload = {
+      id: membreId,
+      ...payloadBase,
+      photo_path,
+      certificat_medical_path,
+      certificat_ophtalmo_path
+    };
+
+    const { error } = await supabaseClient
+      .from('membres')
+      .insert([payload]);
+
+    if (error) {
+      console.error(error);
+      toast('❌ Erreur envoi : ' + (error.message || 'inconnue'),'te');
+      return;
+    }
+
+    document.getElementById('s3').style.display='none';
+    document.getElementById('s-ok').style.display='block';
+    window.scrollTo(0,0);
+    toast('✅ Dossier envoyé (avec fichiers)','tv');
+
+  } catch (e) {
+    console.error(e);
+    toast('❌ Upload/Envoi impossible : ' + (e.message || 'Erreur'),'te');
+  }
+}
+
+
+
+// ── ADMIN ──
+function doLogin() {
+  const u=document.getElementById('l-u').value.trim();
+  const p=document.getElementById('l-p').value.trim();
+  if (u==='admin'&&p==='bcf2025') {
+    document.getElementById('admin-login').style.display='none';
+    document.getElementById('admin-panel').style.display='block';
+    renderAdh();
+    toast('✅ Bienvenue, administrateur','tv');
+  } else { toast('❌ Identifiants incorrects','te'); }
+}
+function doLogout() {
+  document.getElementById('admin-login').style.display='flex';
+  document.getElementById('admin-panel').style.display='none';
+  ['l-u','l-p'].forEach(id=>document.getElementById(id).value='');
+}
+function filterAdh(f,btn) {
+  filtre=f;
+  document.querySelectorAll('.fb2').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderAdh();
+}
+function searchAdh(q) { search=q.toLowerCase(); renderAdh(); }
+function renderAdh() {
+  let list=DATA;
+  if (filtre!=='tous') list=list.filter(a=>a.statut===filtre);
+  if (search) list=list.filter(a=>(a.nom+' '+a.prenom).toLowerCase().includes(search));
+  document.getElementById('adh-list').innerHTML = list.length
+    ? list.map(a=>`
+      <div class="adh-row" onclick="openSheet(${DATA.indexOf(a)})">
+        <div class="adh-av">${a.prenom[0]+a.nom[0]}</div>
+        <div style="flex:1"><div class="adh-nom">${a.prenom} ${a.nom}</div><div class="adh-inf">${a.cat} · ${a.date}</div></div>
+        <div>${SB[a.statut]}</div>
+      </div>`).join('')
+    : '<div style="text-align:center;padding:32px;color:var(--gris);font-size:.85rem">Aucun résultat</div>';
+}
+function openSheet(i) {
+  const a=DATA[i];
+  document.getElementById('sh-av').textContent=a.prenom[0]+a.nom[0];
+  document.getElementById('sh-nom').textContent=a.prenom+' '+a.nom;
+  document.getElementById('sh-meta').textContent=a.cat+' · Inscrit le '+a.date;
+  document.getElementById('sh-info').innerHTML=`
+    <div class="ic"><div class="ic-l">Téléphone</div><div class="ic-v">${a.tel}</div></div>
+    <div class="ic"><div class="ic-l">Statut</div><div class="ic-v">${SB[a.statut]}</div></div>
+    <div class="ic" style="grid-column:1/-1"><div class="ic-l">Email</div><div class="ic-v">${a.email}</div></div>`;
+  document.getElementById('sh-docs').innerHTML=['photo','medical','ophtalmo'].map(d=>{
+    const m=DM[d]; const ok=a.docs.includes(d);
+    return `<div class="sdoc">
+      <div class="sdoc-ico">${m.ico}</div>
+      <div style="flex:1"><div class="sdoc-nom">${m.nom}</div><div class="sdoc-tail">${ok?m.taille:'Non fourni'}</div></div>
+      ${ok?`<button class="btn-sdl" onclick="toast('📥 Téléchargement...','tv')">📥 DL</button>`:`<span class="badge br">Manquant</span>`}
+    </div>`;
+  }).join('');
+  document.getElementById('overlay').classList.add('on');
+}
+function closeSheet(e) {
+  if (!e||e.target===document.getElementById('overlay'))
+    document.getElementById('overlay').classList.remove('on');
+}
+
+// ── TOAST ──
+let tt;
+function toast(msg,type='') {
+  const el=document.getElementById('toast-el');
+  el.textContent=msg; el.className='toast show '+type;
+  clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+renderAdh();
+</script>
+</body>
+</html>
